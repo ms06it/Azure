@@ -1,0 +1,35 @@
+trigger:
+- main  # Change this to match your branch name
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: UsePythonVersion@0
+  inputs:
+    versionSpec: '3.x'
+    addToPath: true
+
+- script: |
+    pip install --upgrade pip
+    pip install azure-cli
+  displayName: 'Install Azure CLI'
+
+- script: |
+    az login --service-principal -u $(servicePrincipalId) -p $(servicePrincipalKey) --tenant $(tenantId)
+    az aks get-credentials --resource-group $(resourceGroupName) --name $(kubernetesClusterName)
+  displayName: 'Azure Login and AKS Get Credentials'
+
+- script: |
+    kubectl apply -f k8s.yml
+  displayName: 'Deploy Kubernetes Manifest'
+
+- task: AzureCLI@2
+  inputs:
+    azureSubscription: $(azureSubscription)
+    scriptType: 'bash'
+    scriptLocation: 'inlineScript'
+    inlineScript: |
+      az aks browse --resource-group $(resourceGroupName) --name $(kubernetesClusterName)
+  displayName: 'Open Kubernetes Dashboard'
+
