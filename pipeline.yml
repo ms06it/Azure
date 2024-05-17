@@ -26,10 +26,9 @@ steps:
 
 - task: AzureCLI@2
   inputs:
-    azureSubscription: $(azureSubscription)
+    azureSubscription: 'your_azure_service_connection_name'
     scriptType: 'bash'
     scriptLocation: 'inlineScript'
     inlineScript: |
       az aks browse --resource-group $(resourceGroupName) --name $(kubernetesClusterName)
   displayName: 'Open Kubernetes Dashboard'
-
